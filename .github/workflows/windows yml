@@ -1,0 +1,44 @@
+name: RDP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rdp:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Google Remote Desktop
+      run: |
+        $url = 'https://dl.google.com/chromeboxfor meetings/GoogleChromeRemoteDesktopHostInstaller.msi'
+        $outFile = 'GoogleChromeRemoteDesktopHostInstaller.msi'
+        Invoke-WebRequest -Uri $url -OutFile $outFile
+        Start-Process msiexec.exe -ArgumentList '/i', $outFile, '/quiet' -Wait
+
+    - name: Prompt for PINs and commands
+      id: input
+      run: |
+        $pins = @()
+        $commands = @()
+        for ($i = 1; $i -le 5; $i++) {
+          Write-Host "Enter the 6-digit PIN for RDP $i:"
+          $pin = Read-Host
+          $pins += $pin
+          Write-Host "Enter the PowerShell command to run for RDP $i:"
+          $command = Read-Host
+          $commands += $command
+        }
+        $pins | ForEach-Object { echo "::set-output name=pin-$_\::$_" }
+        $commands | ForEach-Object { echo "::set-output name=command-$_\::$_" }
+
+    - name: Start Google Remote Desktops
+      run: |
+        for ($i = 1; $i -le 5; $i++) {
+          $pin = ${{ steps.input.outputs.pin-$i }}
+          $command = ${{ steps.input.outputs.command-$i }}
+          $command = "$command --remote-debugging-port=922$i --no-first-run --no-default-browser-check --user-data-dir=`"C:\tmp\rdp$i`" --remote-debugging-address=0.0.0.0 --app=https://remotedesktop.google.com/_/api/auth?continue=https://remotedesktop.google.com/headless&service=chromoting&PIN=$pin"
+          Start-Process powershell.exe -ArgumentList "-Command", $command
+        }
