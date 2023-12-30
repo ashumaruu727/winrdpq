@@ -1,0 +1,27 @@
+name: Setup Chrome Remote Desktop
+
+on:
+  workflow_dispatch:
+    inputs:
+      CRD_CODE:
+        description: 'CRD Code'     
+        required: true
+      CRD_PIN:
+        description: 'CRD PIN'     
+        required: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Run setup script
+      env:
+        CRD_CODE: ${{ github.event.inputs.CRD_CODE }}
+        CRD_PIN: ${{ github.event.inputs.CRD_PIN }}
+      run: |
+        # Run your setup script here. For example:
+        bash setup-crd.sh $CRD_CODE $CRD_PIN
