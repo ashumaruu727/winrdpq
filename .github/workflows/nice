@@ -1,0 +1,27 @@
+name: Launch Google Remote Desktop
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  launch:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Google Remote Desktop
+      run: |
+        Invoke-WebRequest -Uri "https://dl.google.com/chromeremote/ChromeRemoteDesktopHostInstaller.msi" -OutFile "ChromeRemoteDesktopHostInstaller.msi"
+        Start-Process -FilePath msiexec.exe -ArgumentList '/i ChromeRemoteDesktopHostInstaller.msi /quiet', '/norestart' -Wait
+
+    - name: Launch Google Remote Desktop and run loop
+      run: |
+        Start-Process -FilePath "C:\Program Files (x86)\Google\Chrome Remote Desktop\ChromeRemoteDesktop.exe" -ArgumentList "/silent"
+        while ($true) {
+          Test-Connection -ComputerName localhost -Count 1 -Quiet
+          Start-Sleep -Seconds 10
+        }
