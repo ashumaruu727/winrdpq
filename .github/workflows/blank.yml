@@ -1,0 +1,19 @@
+name: Windows-CRD
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Run Google RDP via PowerShell
+        run: |
+          # Add the PowerShell command for Google RDP here
+          # For example:
+          # powershell -command "Your Google RDP command here"
+          # Add the PIN code for Google RDP here
+          # For example:
+          # powershell -command "Your Google RDP command here" -pin "Your PIN code here"
